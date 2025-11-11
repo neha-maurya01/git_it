@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICICI Loan Collection Bot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+        }
+        h2 {
+            color: #d32f2f;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
+        input, button, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #d32f2f;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #b71c1c;
+        }
+        .chat-box {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+        .chat-box p {
+            margin: 5px 0;
+        }
+        .user {
+            color: #007bff;
+            text-align: right;
+        }
+        .bot {
+            color: #d32f2f;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>ICICI Loan Collection Bot</h2>
+
+    <div class="container">
+        <h3>Enter Loan Details</h3>
+        <input type="text" id="name" placeholder="Customer Name">
+        <input type="text" id="loan_type" placeholder="Loan Type (e.g., Home Loan)">
+        <input type="number" id="days" placeholder="Days Pending">
+        <input type="text" id="amount" placeholder="Loan Amount (e.g., ₹32,500)">
+        <button onclick="startConversation()">Start Conversation</button>
+
+        <h3>Chat with AI</h3>
+        <div class="chat-box" id="chat-box"></div>
+        <textarea id="user-input" placeholder="Type your message..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const apiUrl = "http://127.0.0.1:5001";  // Backend URL
+
+        function appendMessage(sender, message) {
+            const chatBox = document.getElementById("chat-box");
+            const msgElement = document.createElement("p");
+            msgElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+            msgElement.classList.add(sender === "Bot" ? "bot" : "user");
+            chatBox.appendChild(msgElement);
+            chatBox.scrollTop = chatBox.scrollHeight;  // Auto-scroll
+        }
+
+        async function startConversation() {
+            const name = document.getElementById("name").value;
+            const loanType = document.getElementById("loan_type").value;
+            const days = document.getElementById("days").value;
+            const amount = document.getElementById("amount").value;
+
+            if (!name || !loanType || !days || !amount) {
+                alert("Please fill all loan details!");
+                return;
+            }
+
+            const payload = { name, loan_type: loanType, days, amount };
+
+            try {
+                const response = await fetch(`${apiUrl}/start`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                appendMessage("Bot", data.message);
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to start conversation.");
+            }
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            appendMessage("You", userInput);
+            document.getElementById("user-input").value = ""; // Clear input
+
+            try {
+                const response = await fetch(`${apiUrl}/chat`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_input: userInput })
+                });
+
+                const data = await response.json();
+                appendMessage("Bot", data.response);
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to send message.");
+            }
+        }
+    </script>
+
+</body>
+</html>

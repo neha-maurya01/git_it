@@ -1,0 +1,86 @@
+API Documentation: Loan Collection Conversation Agent
+
+Overview:
+This API facilitates automated conversations for loan collection agents using a language model. It manages conversation sessions, stores context, and generates appropriate responses based on user input.
+
+
+Install dependencies:
+	pip install -r requirements.txt
+
+Start the API service:
+	python app.py
+
+The FastAPI server runs at `http://127.0.0.1:5001/`.
+
+User Interface
+	- The chatbot can be accessed via `user_interface.html`.
+	- Open `user_interface.html` in a web browser to interact with the bot.
+
+API Endpoints:
+
+	-Start Conversation (Dynamic Loan Details)
+		•	Endpoint: POST /start
+		•	Request:
+
+ 			{
+  			"name": "Amit Kumar",
+  			"loan_type": "Personal Loan",
+  			"days": "30",
+  			"amount": "₹50,000"
+			}
+
+
+		•	Response:
+
+			{"message": "Hello Amit Kumar. I am calling from ICICI Home 				Finance regarding payment. Can I continue?"}
+
+
+
+	-Continue Chat
+		•	Endpoint: POST /chat
+		•	Request:
+
+			{"user_input": "I already paid my loan"}
+
+
+		•	Response:
+
+			{"response": "Please contact your nearest branch or our customer 			care. Thank you."}
+
+
+
+	-Retrieve Chat History
+		•	Endpoint: GET /history
+		•	Response:
+
+			{
+  			"chat_history": [
+    			"Hello Amit Kumar. I am calling from ICICI Home Finance regarding 			payment. Can I continue?",
+    			"I already paid my loan",
+    			"Please contact your nearest branch or our customer care. Thank you."
+  			]
+			}
+
+
+Configuration (config.py):
+
+	OLLAMA_MODEL = "mistral"
+	SERVICE_PORT = 5001
+	OLLAMA_STARTUP_TIME = 5
+
+
+Handles various scenarios: Disputes, Payment Queries, Wrong Numbers
+Follows ICICI Bank's collection guidelines
+Uses Mistral model via Ollama for response generation
+
+
+Error Messages:
+
+500 Internal Server Error: {"error": "Something went wrong. Please try again later."}
+
+400 Bad Request (Missing Fields): {"error": "Missing required fields in request."}
+
+404 Not Found (Invalid Endpoint): {"error": "Endpoint not found."}
+
+503 Service Unavailable (Ollama Down): {"error": "Ollama service is unavailable. Please restart the server."}
+
