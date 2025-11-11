@@ -1,49 +1,48 @@
-import shutil
+import json
 from pathlib import Path
-import nbformat
 
 ROOT = Path(__file__).parent
 
-def ensure_state(obj):
-    # obj is a dict-like metadata; if it contains "widgets" ensure "state" exists
-    if not isinstance(obj, dict):
-        return False
-    widgets = obj.get("widgets")
-    if widgets is None:
-        return False
-    if "state" not in widgets:
-        widgets["state"] = {}
-        obj["widgets"] = widgets
-        return True
-    return False
-
-def fix_notebook(path: Path):
-    nb = nbformat.read(path, as_version=nbformat.NO_CONVERT)
+def fix_notebook_json(path: Path):
+    with open(path, 'r', encoding='utf-8') as f:
+        nb = json.load(f)
+    
     changed = False
-
-    # top-level metadata
-    if ensure_state(nb.metadata):
-        changed = True
-
-    # per-cell metadata
-    for cell in nb.get("cells", []):
-        if ensure_state(cell.get("metadata", {})):
+    
+    # Fix top-level metadata.widgets
+    if "metadata" not in nb:
+        nb["metadata"] = {}
+    meta = nb["metadata"]
+    if "widgets" in meta and isinstance(meta["widgets"], dict):
+        if "state" not in meta["widgets"]:
+            meta["widgets"]["state"] = {}
             changed = True
-
+    
+    # Fix cell-level metadata.widgets
+    for cell in nb.get("cells", []):
+        if "metadata" not in cell:
+            cell["metadata"] = {}
+        cell_meta = cell["metadata"]
+        if "widgets" in cell_meta and isinstance(cell_meta["widgets"], dict):
+            if "state" not in cell_meta["widgets"]:
+                cell_meta["widgets"]["state"] = {}
+                changed = True
+    
     if changed:
-        bak = path.with_suffix(path.suffix + ".bak")
-        shutil.copy2(path, bak)
-        nbformat.write(nb, path)
-        print(f"Fixed: {path} (backup: {bak.name})")
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(nb, f, indent=1)
+        print(f"Fixed: {path}")
+        return True
     else:
         print(f"No change: {path}")
+        return False
 
 def main():
     for ipynb in ROOT.rglob("*.ipynb"):
         try:
-            fix_notebook(ipynb)
+            fix_notebook_json(ipynb)
         except Exception as e:
-            print(f"Error processing {ipynb}: {e}")
+            print(f"Error: {ipynb} — {e}")
 
 if __name__ == "__main__":
     main()
