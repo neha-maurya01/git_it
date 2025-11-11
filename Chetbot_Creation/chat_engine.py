@@ -2,7 +2,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_ollama.llms import OllamaLLM
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
-from config import OLLAMA_MODEL
+from Chetbot_Creation.config import OLLAMA_MODEL
 
 memory = ConversationBufferMemory(memory_key="chat_history")
 loan_details = {}  # Store dynamically received loan details

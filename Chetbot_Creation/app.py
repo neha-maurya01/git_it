@@ -1,9 +1,9 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from ollama_service import start_ollama
+from Chetbot_Creation.ollama_service import start_ollama
 from chat_engine import generate_response, get_chat_history, update_loan_details
-from config import SERVICE_PORT
+from Chetbot_Creation.config import SERVICE_PORT
 from fastapi.middleware.cors import CORSMiddleware
 
 start_ollama()

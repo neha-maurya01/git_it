@@ -1,7 +1,7 @@
 import subprocess
 import threading
 import time
-from config import OLLAMA_STARTUP_TIME
+from Chetbot_Creation.config import OLLAMA_STARTUP_TIME
 
 def run_ollama():
     """Start Ollama server in a separate thread."""
